@@ -20,6 +20,7 @@ public class SearchService {
 
     private List<GithubRepo> crawlingGithubRepos(List<String> github) {
         List<GithubRepo> githubRepos = new ArrayList<>();
+        System.out.println("crawl: " + github);
         for (String githubAddr : github) {
             try {
                 org.jsoup.nodes.Document doc = Jsoup.connect(githubAddr+"?tab=repositories").get();
@@ -31,13 +32,12 @@ public class SearchService {
                 System.out.println("Error: Jsoup connect error(" + githubAddr+"?tab=repositories)");
             }
         }
-        System.out.println(githubRepos);
         return githubRepos;
     }
 
     private GithubRepo crawlingGithubRepoInfo(String repo) {
         GithubRepo githubRepo = new GithubRepo();
-        System.out.println(repo);
+        System.out.println("crawl: " + repo);
         githubRepo.setAddr(repo);
         githubRepo.setUsed_tech(new String[]{"spring", "springboot"});
         List<Map<String,String>> used_lang = new ArrayList<>();
@@ -53,7 +53,6 @@ public class SearchService {
             System.out.println("Error: Jsoup connect error(" + repo + ")");
         }
         githubRepo.setUsed_lang(used_lang);
-        System.out.println(githubRepo);
         return githubRepo;
     }
 
