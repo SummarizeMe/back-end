@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/SumMe?autoReconnect=true
+    url: jdbc:mysql://localhost:3306/summarizeme?autoReconnect=true
     username: root
-    password: 1234
+    password: 1015
 
   jpa:
     properties:
