@@ -91,29 +91,29 @@ public class SearchService {
     }
     private Calender crawlingGithubCalen(String githubAddr, String date) {
         Calender calender = new Calender();
-        System.out.println("crawl: "+ date);
+        System.out.println("crawl: " + date);
         calender.setDate(date);
-        List<Map<String,String>> works = new ArrayList<>();
-        try{
+        List<Map<String, String>> works = new ArrayList<>();
+        try {
             //https://github.com/raipen?from=2022-12-01&to=2022-12-01&tab=overview
             //org.jsoup.nodes.Document doc = Jsoup.connect("https://github.com/raipen?from=2022-12-01&to=2022-12-01&tab=overview").get();
-            org.jsoup.nodes.Document doc = Jsoup.connect(githubAddr+"?from="+date+"&to="+date+"&tab=overview").get();
-            System.out.println(githubAddr+"?from="+date+"&to="+date+"&tab=overview");
-            List<Map<String,Object>> data = new ArrayList<>();
+            org.jsoup.nodes.Document doc = Jsoup.connect(githubAddr + "?from=" + date + "&to=" + date + "&tab=overview").get();
+            System.out.println(githubAddr + "?from=" + date + "&to=" + date + "&tab=overview");
+            List<Map<String, Object>> data = new ArrayList<>();
             Elements div = doc.select("div.col-8.css-truncate.css-truncate-target.lh-condensed.width-fit.flex-auto.min-width-0");
-            for(Element a : div) {
-                Map<String,Object> work = new HashMap<>();
-                work.put("type","github");
-                work.put("repo",a.select("a").get(0).text());
-                work.put("commit",a.select("a").get(1).text());
+            for (Element a : div) {
+                Map<String, Object> work = new HashMap<>();
+                work.put("type", "github");
+                work.put("repo", a.select("a").get(0).text());
+                work.put("commit", a.select("a").get(1).text());
                 data.add(work);
             }
             calender.setWorks(data);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println("Error: Jsoup connect error(" + date + ")");
         }
         return calender;
+    }
 
     public List<String> crawlingdcommitperiod(List<String> github) {
         List<String> years = new ArrayList<>();
