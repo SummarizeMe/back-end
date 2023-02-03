@@ -1,5 +1,6 @@
 package SumMe.SummerizeMe.controller;
 
+import SumMe.SummerizeMe.domain.BasicInfo.Calender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import SumMe.SummerizeMe.domain.BasicInfo.BasicInfo;
 import SumMe.SummerizeMe.service.SearchService;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RequestMapping("/api/v1/search")
@@ -25,9 +28,7 @@ public class SearchController {
         List<String> blog = (List<String>) requestData.get("blog");
         return searchService.crawlingBasicInfo(github, blog);
     }
-
-
-
+    
     @RequestMapping("/qwer")
     @ResponseBody
     public Object test2(){
@@ -39,6 +40,15 @@ public class SearchController {
 
         //searchService.crawlingdcommitperiod(github);
         return searchService.crawlingMonthlyCommits(github);
+    }
+
+    @RequestMapping("/test")
+    @ResponseBody
+    public List<Calender> test(){
+        List<String> githubRepos = new ArrayList<>();
+        githubRepos.add("https://github.com/raipen");
+        List<Calender> list = searchService.createCalender(githubRepos,5,7);
+        return list;
     }
 
 }

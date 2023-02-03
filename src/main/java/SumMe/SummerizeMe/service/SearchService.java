@@ -1,14 +1,13 @@
 package SumMe.SummerizeMe.service;
 
 import SumMe.SummerizeMe.domain.BasicInfo.*;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import org.jsoup.Jsoup; 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
+import org.jsoup.Jsoup;
+
+import java.util.*;
 
 @Service
 public class SearchService {
@@ -16,7 +15,7 @@ public class SearchService {
         BasicInfo basicInfo = new BasicInfo();
         basicInfo.setGithub_repos(crawlingGithubRepos(github));
         basicInfo.setBlog(crawlingBlog(blog));
-        basicInfo.setCalender(createCalender(github,blog));
+        basicInfo.setCalender(createCalender(github,3,5));
         return basicInfo;
     }
 
@@ -64,9 +63,57 @@ public class SearchService {
         return null;
     }
 
-    private List<Calender> createCalender(List<String> github, List<String> blog) {
-        return null;
+    public List<Calender> createCalender(List<String> github, int StartMonth, int EndMonth) {
+        List<Calender> githubDate = new ArrayList<>();
+        System.out.println("crawl: " + github);
+        for (String githubAddr : github) {
+            try {
+                Document doc = Jsoup.connect(githubAddr+"?tab=overview&from").get();
+                Elements rectArr = doc.select("rect.ContributionCalendar-day");
+                int rectArrsize = rectArr.size();
+                //rectArr.sublist(0,rectArrsize-5);
+                rectArr.subList(rectArrsize-5,rectArrsize).clear();
+                for(Element rect : rectArr){
+                    if(!rect.attr("data-level").equals("0")) {
+                        int month = Integer.parseInt(rect.attr("data-date").split("-")[1]);
+                        if(month >= StartMonth && month <= EndMonth){
+                            //System.out.println(rect.attr("data-date"));
+                            String date = rect.attr("data-date");
+                            githubDate.add(crawlingGithubCalen(githubAddr , date));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Error: Jsoup connect error(" + githubAddr+"?tab=overview)");
+            }
+        }
+        return githubDate;
     }
+    private Calender crawlingGithubCalen(String githubAddr, String date) {
+        Calender calender = new Calender();
+        System.out.println("crawl: "+ date);
+        calender.setDate(date);
+        List<Map<String,String>> works = new ArrayList<>();
+        try{
+            //https://github.com/raipen?from=2022-12-01&to=2022-12-01&tab=overview
+            //org.jsoup.nodes.Document doc = Jsoup.connect("https://github.com/raipen?from=2022-12-01&to=2022-12-01&tab=overview").get();
+            org.jsoup.nodes.Document doc = Jsoup.connect(githubAddr+"?from="+date+"&to="+date+"&tab=overview").get();
+            System.out.println(githubAddr+"?from="+date+"&to="+date+"&tab=overview");
+            List<Map<String,Object>> data = new ArrayList<>();
+            Elements div = doc.select("div.col-8.css-truncate.css-truncate-target.lh-condensed.width-fit.flex-auto.min-width-0");
+            for(Element a : div) {
+                Map<String,Object> work = new HashMap<>();
+                work.put("type","github");
+                work.put("repo",a.select("a").get(0).text());
+                work.put("commit",a.select("a").get(1).text());
+                data.add(work);
+            }
+            calender.setWorks(data);
+        }
+        catch(Exception e){
+            System.out.println("Error: Jsoup connect error(" + date + ")");
+        }
+        return calender;
 
     public List<String> crawlingdcommitperiod(List<String> github) {
         List<String> years = new ArrayList<>();
