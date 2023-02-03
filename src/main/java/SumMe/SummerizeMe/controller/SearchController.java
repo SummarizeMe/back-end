@@ -28,6 +28,19 @@ public class SearchController {
         List<String> blog = (List<String>) requestData.get("blog");
         return searchService.crawlingBasicInfo(github, blog);
     }
+    
+    @RequestMapping("/qwer")
+    @ResponseBody
+    public Object test2(){
+        List<String> github = new ArrayList<>();
+        github.add("https://github.com/raipen");
+
+
+        //MonthlyCommit m = new MonthlyCommit();
+
+        //searchService.crawlingdcommitperiod(github);
+        return searchService.crawlingMonthlyCommits(github);
+    }
 
     @RequestMapping("/test")
     @ResponseBody
