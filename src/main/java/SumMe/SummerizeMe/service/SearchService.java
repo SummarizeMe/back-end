@@ -11,15 +11,8 @@ import java.util.*;
 
 @Service
 public class SearchService {
-    public BasicInfo crawlingBasicInfo(List<String> github, List<String> blog) {
-        BasicInfo basicInfo = new BasicInfo();
-        basicInfo.setGithub_repos(crawlingGithubRepos(github));
-        basicInfo.setBlog(crawlingBlog(blog));
-        basicInfo.setCalender(createCalender(github,3,5));
-        return basicInfo;
-    }
 
-    private List<GithubRepo> crawlingGithubRepos(List<String> github) {
+    public List<GithubRepo> crawlingGithubRepos(List<String> github) {
         List<GithubRepo> githubRepos = new ArrayList<>();
         System.out.println("crawl: " + github);
         for (String githubAddr : github) {
@@ -63,7 +56,7 @@ public class SearchService {
         return null;
     }
 
-    public List<Calender> createCalender(List<String> github, int StartMonth, int EndMonth) {
+    public List<Calender> createCalender(List<String> github, Map<String,Object> start, Map<String,Object> end) {
         List<Calender> githubDate = new ArrayList<>();
         System.out.println("crawl: " + github);
         for (String githubAddr : github) {
@@ -71,13 +64,11 @@ public class SearchService {
                 Document doc = Jsoup.connect(githubAddr+"?tab=overview&from").get();
                 Elements rectArr = doc.select("rect.ContributionCalendar-day");
                 int rectArrsize = rectArr.size();
-                //rectArr.sublist(0,rectArrsize-5);
                 rectArr.subList(rectArrsize-5,rectArrsize).clear();
                 for(Element rect : rectArr){
                     if(!rect.attr("data-level").equals("0")) {
                         int month = Integer.parseInt(rect.attr("data-date").split("-")[1]);
-                        if(month >= StartMonth && month <= EndMonth){
-                            //System.out.println(rect.attr("data-date"));
+                        if(month >= (int) start.get("month") && month <= (int) end.get("month")){
                             String date = rect.attr("data-date");
                             githubDate.add(crawlingGithubCalen(githubAddr , date));
                         }
@@ -141,46 +132,42 @@ public class SearchService {
         return years;
     }
 
-    public int[][] crawlingMonthlyCommits(List<String> github) {
+    public List<Map<String,Object>> crawlingMonthlyCommits(List<String> github) {
         //List<MonthlyCommit> monthlyCommits = new ArrayList<>();
 
         List<String> year = crawlingdcommitperiod(github);
 
-        int[][] Monthlycommit = new int[year.size()][13];
-        int num = 0;
+        List<Map<String,Object>> Monthlycommit = new ArrayList<>();
         for(String gitlink: github) {
             System.out.println(gitlink);
             for(String y : year){
                 System.out.println(y);
-                Monthlycommit[num][0] = Integer.parseInt(y);
+                Map<String,Object> monthlyCommit = new HashMap<>();
+                monthlyCommit.put("year", Integer.parseInt(y));
+                int commitCount[] = new int[12];
                 try{
                     //System.out.println(gitlink + "?tab=overview&from="+y+"-01-01&to="+y+"-01-31");
                     org.jsoup.nodes.Document doc = Jsoup.connect(gitlink + "?tab=overview&from="+y+"-01-01&to="+y+"-01-31").get();
                     Elements a = doc.select(".ContributionCalendar-day");
-                    System.out.println(num);
                     for(var e : a) {
                         //System.out.println(e.attr("data-date"));
                         int month = Integer.parseInt(e.attr("data-date").split("-")[1]);
                         //System.out.println(month);
                         try{
                             int commit = Integer.parseInt(e.text().split(" ")[0]);
-                            Monthlycommit[num][month] += commit;
+                            commitCount[month-1] += commit;
                         }
                         catch(NumberFormatException ex){
                             //ex.printStackTrace();
                         }
                     }
-
-
                 } catch(Exception e){
                     //System.out.println(e);
                 }
-                num += 1;
+                System.out.println(Arrays.toString(commitCount));
+                monthlyCommit.put("commit", commitCount);
+                Monthlycommit.add(monthlyCommit);
             }
-        }
-
-        for(int[] a : Monthlycommit){
-            System.out.println(Monthlycommit);
         }
 
         return Monthlycommit;
