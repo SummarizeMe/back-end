@@ -4,9 +4,17 @@ import SumMe.SummerizeMe.domain.BasicInfo.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
 import org.jsoup.Jsoup;
 
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -159,7 +167,8 @@ public class SearchService {
                     Elements a = doc.select(".ContributionCalendar-day");
                     System.out.println(num);
                     for(var e : a) {
-                        //System.out.println(e.attr("data-date"));
+                        System.out.println(e.attr("data-date"));
+
                         int month = Integer.parseInt(e.attr("data-date").split("-")[1]);
                         //System.out.println(month);
                         try{
@@ -185,4 +194,59 @@ public class SearchService {
 
         return Monthlycommit;
     }
+
+    public List<String> getlinksforVelog(List<String> velog){
+        List<String> info = new ArrayList<>();
+         for(String veloglink : velog){
+            try{
+                org.jsoup.nodes.Document doc = Jsoup.connect(veloglink).get();
+                Elements posts = doc.select(".sc-gslxeA");
+                System.out.println(posts);
+                for(Element p : posts) {
+                    info.add(p.select("a").first().attr("abs:href"));
+
+                }
+            } catch(Exception e){
+                System.out.println("조졌네 이거");
+            }
+        }
+        System.out.println(info);
+        return info;
+    }
+
+    public List<Velog> getinfofromVelog(List<String> links){
+        List<Velog> info = new ArrayList<>();
+        Velog temp = new Velog();
+        //이 함수에서는 date post제목 가져오고
+        // 다른 함수에서 주요 키워드 분석해주기
+        // 나중엔 getlinksfor velog이거 수정해서 저 함수안에서 모두 호출하는걸
+        for (String link : links){
+            try{
+                //포스트 제목 구하기는 간단함
+                temp.setUrl(link);
+                System.out.println(link);
+                temp.setTitle(link.split("/")[4]);
+                System.out.println(link.split("/")[4]);
+                //System.out.println(postname);
+                org.jsoup.nodes.Document doc = Jsoup.connect(link).get();
+                System.out.println("들어옴");
+                Elements a = doc.select(".information span");
+                //System.out.println(String.valueOf(a.text()).split("·")[1]);
+                temp.setDate(String.valueOf(a.text()).split("·")[1]);
+                //date, url, title 짠
+
+                info.add(temp);
+            }
+            catch(Exception e){
+                System.out.println("빠빠빠");
+                System.out.println(e);
+            }
+
+        }
+        return info;
+
+    }
+
+
+
 }
