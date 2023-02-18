@@ -1,6 +1,7 @@
 package SumMe.SummerizeMe.controller;
 
 import SumMe.SummerizeMe.domain.BasicInfo.Calender;
+import SumMe.SummerizeMe.domain.BasicInfo.Tistory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,7 +27,8 @@ public class SearchController {
     public BasicInfo github(@RequestBody Map<String, Object> requestData) {
         List<String> github = (List<String>) requestData.get("github");
         List<String> blog = (List<String>) requestData.get("blog");
-        return searchService.crawlingBasicInfo(github, blog);
+        List<String> tistory = (List<String>) requestData.get("tistory");
+        return searchService.crawlingBasicInfo(github, blog, tistory);
     }
 
     @RequestMapping("/test")
@@ -36,6 +38,14 @@ public class SearchController {
         githubRepos.add("https://github.com/raipen");
         List<Calender> list = searchService.createCalender(githubRepos,5,7);
         return list;
+    }
+
+    @RequestMapping("/tistorytest")
+    @ResponseBody
+    public List<Tistory> tistorytest(){
+        List<String> githubRepos = new ArrayList<>();
+        githubRepos.add("https://eyls22.tistory.com/");
+        return searchService.crawlingTistory(githubRepos);
     }
 
 }
