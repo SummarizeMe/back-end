@@ -3,6 +3,7 @@ package SumMe.SummerizeMe.service;
 import SumMe.SummerizeMe.domain.GithubRepo;
 import SumMe.SummerizeMe.domain.Calender;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,6 +23,8 @@ import org.json.simple.parser.JSONParser;
 
 @Service
 public class GithubService{
+    @Value("${github.token}")
+    private String token;
 
     private JSONArray crawlingUserCommits(String name){
         JSONArray items = new JSONArray();
@@ -93,6 +96,7 @@ public class GithubService{
         try{
             Document doc = Jsoup
             .connect(url)
+            .header("Authorization", "Token "+token)
             .ignoreContentType(true)
             .get();
             JSONArray jsonArray = (JSONArray) jsonParser.parse(doc.text());
@@ -115,6 +119,7 @@ public class GithubService{
         try{
             Document doc = Jsoup
             .connect(url)
+            .header("Authorization", "Token "+token)
             .ignoreContentType(true)
             .get();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(doc.text());
