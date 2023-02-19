@@ -3,12 +3,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/summarizeme?autoReconnect=true
     username: root
-    password: 1015
+    password: 1018
 
   jpa:
     properties:
       hibernate:
         format_sql: true
+    show-sql: true
     hibernate:
       ddl-auto: update
 
