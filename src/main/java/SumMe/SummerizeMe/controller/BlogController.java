@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 
+import kr.bydelta.koala.data.Sentence;
+
 @RequestMapping("/api/v1/blog")
 @Controller
 public class BlogController {
@@ -27,7 +29,6 @@ public class BlogController {
     @RequestMapping("/tistory")
     @ResponseBody
     public List<Blog> tistory(@RequestBody List<String> tistory) {
-        //테스트 주소: https://eyls22.tistory.com/
         return blogService.crawlingTistory(tistory);
     }
 }

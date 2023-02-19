@@ -12,9 +12,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.Arrays;
+
+import kr.bydelta.koala.kkma.Tagger;
+import kr.bydelta.koala.data.Sentence;
+import kr.bydelta.koala.data.Word;
+import kr.bydelta.koala.data.Morpheme;
+
 
 @Service
 public class BlogService{
+
+    private String Preposition[] = {"a","about","above","across","after","against","along",
+    "amid","among","anti","around","as","at",
+    "before","behind","below","beneath","beside","besides","between","beyond","but","by",
+    "concerning","considering","despite","down","during","except","excepting",
+    "excluding","following","for","from","in","inside","into","like","minus","near",
+    "of","off","on","onto","opposite","outside","over","past","per","plus","regarding",
+    "round","save","since","than","through","to","toward","towards","under",
+    "underneath","unlike","until","up","upon","versus","via","with","within","without"};
 
     public List<String> getlinksforVelog(List<String> velog){
         List<String> info = new ArrayList<>();
@@ -48,18 +65,13 @@ public class BlogService{
                 System.out.println(link);
                 temp.setTitle(link.split("/")[4]);
                 System.out.println(link.split("/")[4]);
-                //System.out.println(postname);
                 org.jsoup.nodes.Document doc = Jsoup.connect(link).get();
-                System.out.println("들어옴");
                 Elements a = doc.select(".information span");
-                //System.out.println(String.valueOf(a.text()).split("·")[1]);
-                temp.setDate(String.valueOf(a.text()).split("·")[1].replace("년","-").replace("월","-").replace("일",""));
-                //date, url, title 짠
-
+                temp.setDate(String.valueOf(a.text()).split("·")[1].replace("년 ","-").replace("월 ","-").replace("일",""));
+                temp.setKeyword(getKeywords(doc.select("#root>div:nth-child(2)>div:nth-child(4)").text()));
                 info.add(temp);
             }
             catch(Exception e){
-                System.out.println("빠빠빠");
                 System.out.println(e);
             }
 
@@ -105,11 +117,57 @@ public class BlogService{
             s = contents[0]+contents[1]+contents[2];
             s = s.substring(0,(s.length()-1)).replace('.','-');
             tistory.setDate(s);
-            
+            tistory.setKeyword(getKeywords(doc.select("div.article-view").text()));
         }
         catch(Exception e){
             System.out.println("Error: Jsoup connect error(" + tistory + ")");
         }
         return tistory;
+    }
+
+    private List<String> getKeywords(String text) {
+        Map<String, Integer> wordCount = new HashMap<>();
+        Tagger tagger = new Tagger();
+        for(Sentence sentence : tagger.tag(text)) {
+            for(Word word : sentence.getNouns()) {
+                for(Morpheme morpheme : word) {
+                    if(morpheme.isNoun()){
+                        String wordString = morpheme.getSurface();
+                        //wordString이 숫자인 경우 제외
+                        if(wordString.length() <= 1&&wordString.matches("^[0-9.]*$"))
+                            continue;
+                        if(wordCount.containsKey(wordString)) {
+                            wordCount.put(wordString, wordCount.get(wordString) + 1);
+                        } else {
+                            wordCount.put(wordString, 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        String[] words2 = text.split(" ");
+        for(String word : words2){
+            if(word.length() > 1&&word.matches("^[a-zA-Z]*$")){
+                if(Arrays.asList(Preposition).contains(word)){
+                    continue;
+                }
+                if(wordCount.containsKey(word)) {
+                    wordCount.put(word, wordCount.get(word) + 1);
+                } else {
+                    wordCount.put(word, 1);
+                }
+            }
+        }
+
+        List<String> keywords = new ArrayList<>();
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(wordCount.entrySet());
+        Collections.sort(entries, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+        for(int i=0; i<5; i++){
+            if(i<entries.size()){
+                keywords.add(entries.get(i).getKey());
+            }
+        }
+        return keywords;
     }
 }
