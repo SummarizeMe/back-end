@@ -134,7 +134,7 @@ public class BlogService{
                     if(morpheme.isNoun()){
                         String wordString = morpheme.getSurface();
                         //wordString이 숫자인 경우 제외
-                        if(wordString.length() <= 1&&wordString.matches("^[0-9.]*$"))
+                        if(wordString.length() <= 1||wordString.matches("^[0-9.]*$"))
                             continue;
                         if(wordCount.containsKey(wordString)) {
                             wordCount.put(wordString, wordCount.get(wordString) + 1);
